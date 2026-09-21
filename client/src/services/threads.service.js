@@ -1,4 +1,4 @@
-```js
+js
 import apiClient from "./apiClient";
 
 export async function getThreads() {
@@ -11,5 +11,5 @@ export async function getThreads() {
     throw error;
   }
 }
-```
+
 
