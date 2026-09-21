@@ -1,6 +1,15 @@
+```js
 import apiClient from "./apiClient";
 
 export async function getThreads() {
-  const res = await apiClient.get("/api/threads");
-  return res.data.threads;
+  try {
+    const response = await apiClient.get("/api/threads");
+
+    return response.data.threads;
+  } catch (error) {
+    console.error("Failed to fetch threads:", error);
+    throw error;
+  }
 }
+```
+
