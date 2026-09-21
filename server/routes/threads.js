@@ -1,37 +1,48 @@
-```js
 import { Router } from "express";
 import prisma from "../prisma/client.js";
 
 const router = Router();
 
-// GET all threads
+// GET paginated threads
 router.get("/", async (req, res, next) => {
   try {
-    const threads = await prisma.thread.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
+    const pageSize = 10;
+    const page = Number(req.query.page) || 1;
+    const skip = (page - 1) * pageSize;
 
-      include: {
-        // Get author information
-        author: {
-          select: {
-            name: true,
-            avatarUrl: true,
-          },
+    const [threads, total] = await Promise.all([
+      prisma.thread.findMany({
+        skip,
+        take: pageSize,
+        orderBy: {
+          createdAt: "desc",
         },
 
-        // Get the number of comments
-        _count: {
-          select: {
-            comments: true,
+        include: {
+          author: {
+            select: {
+              name: true,
+              avatarUrl: true,
+            },
+          },
+
+          _count: {
+            select: {
+              comments: true,
+            },
           },
         },
-      },
-    });
+      }),
+
+      prisma.thread.count(),
+    ]);
+
+    const hasMore = total > page * pageSize;
 
     res.status(200).json({
       threads,
+      total,
+      hasMore,
     });
   } catch (error) {
     next(error);
@@ -39,5 +50,3 @@ router.get("/", async (req, res, next) => {
 });
 
 export default router;
-```
-
